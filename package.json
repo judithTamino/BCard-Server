@@ -1,0 +1,32 @@
+{
+  "name": "bcard-server",
+  "version": "1.0.0",
+  "description": "Server side management system that allows business users to publish, edit and delete cards",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/judithTamino/BCard-Server.git"
+  },
+  "author": "Judith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/judithTamino/BCard-Server/issues"
+  },
+  "homepage": "https://github.com/judithTamino/BCard-Server#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
