@@ -3,8 +3,6 @@ import bcrypt from "bcryptjs";
 import { DEFAULT_VALIDATION, EMAIL, PHONE } from "../utils/validations.js";
 import { imageSchema } from "../schemas/image.schema.js";
 import { addressSchema } from "../schemas/address.schema.js";
-import { error } from "console";
-
 
 const nameSchema = new mongoose.Schema({
   first: DEFAULT_VALIDATION,
