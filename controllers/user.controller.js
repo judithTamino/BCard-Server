@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 import isValidAddress from "../utils/isValidAddress.js";
 import { generateAuthToken } from '../auth/jwt.js';
 import editUserSchema from '../validations/joi/editUser.js';
+import { ensureDocumentExists } from '../utils/ensureDocumentExists.js';
 
 const isValidName = (name) => {
   const { first, last } = name;
@@ -34,10 +35,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   // check if user exists
   const user = await User.findOne({ email });
-  if (!user) {
-    res.status(404);
-    throw new Error('User not Found');
-  }
+  ensureDocumentExists(user, 'User', res);
 
   // check if password correct
   const isPasswordValid = await bcrypt.compareSync(password, user.password);
@@ -78,10 +76,7 @@ export const getUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(id);
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
+  ensureDocumentExists(user, 'User', res);
 
   res.status(200).json(user);
 });
@@ -101,10 +96,7 @@ export const editUser = asyncHandler(async (req, res) => {
 
   // find user
   const user = await User.findById(id);
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
+  ensureDocumentExists(user, 'User', res);
 
   // Joi validation -> validate input
   const { error } = editUserSchema.validate(req.body);
@@ -130,9 +122,51 @@ export const editUser = asyncHandler(async (req, res) => {
 // @des Change Business status
 // @route PATCH/users/:id
 // @access registered user
-export const changeBusinessStatus = asyncHandler(async (req, res) => { });
+export const changeBusinessStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userData = req.user;
+  const { isBusiness } = req.body;
+
+  // check authorization 
+  if (userData._id !== id) {
+    res.status(403);
+    throw new Error('You are not authorized to change business status of this user.');
+  }
+
+  // find user
+  const user = await User.findById(id);
+  ensureDocumentExists(user, 'User', res);
+  // if (!user) {
+  //   res.status(404);
+  //   throw new Error('User not found');
+  // }
+
+  // chack typeof isBusiness
+  if (typeof isBusiness !== 'boolean') {
+    res.status(400);
+    throw new Error('Business status must be true or false.');
+  }
+
+  user.isBusiness = isBusiness;
+  user.save();
+  res.status(200).json(user);
+});
 
 // @des Delete User
 // @route DELETE/users/:id
 // @access registered user / admin
-export const deleteUser = asyncHandler(async (req, res) => { });
+export const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userData = req.user;
+
+  // check authorization
+  if (!userData.isAdmin && userData._id !== id) {
+    res.status(403);
+    throw new Error('You are not authorized to delete this user.');
+  }
+
+  const deletedUser = await User.findByIdAndDelete(id);
+  ensureDocumentExists(deletedUser, 'User', res);
+
+  res.status(200).json(deletedUser);
+});
