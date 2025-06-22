@@ -4,7 +4,7 @@ import User from "../models/user.model.js";
 import isValidAddress from "../utils/isValidAddress.js";
 import { generateAuthToken } from '../auth/jwt.js';
 import editUserSchema from '../validations/joi/editUser.js';
-import { ensureDocumentExists } from '../utils/ensureDocumentExists.js';
+import IsExists from '../utils/IsExists.utils.js';
 
 const isValidName = (name) => {
   const { first, last } = name;
@@ -35,7 +35,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   // check if user exists
   const user = await User.findOne({ email });
-  ensureDocumentExists(user, 'User', res);
+  IsExists(user, 'User', res);
 
   // check if password correct
   const isPasswordValid = await bcrypt.compareSync(password, user.password);
@@ -76,7 +76,7 @@ export const getUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(id);
-  ensureDocumentExists(user, 'User', res);
+  IsExists(user, 'User', res);
 
   res.status(200).json(user);
 });
@@ -96,7 +96,7 @@ export const editUser = asyncHandler(async (req, res) => {
 
   // find user
   const user = await User.findById(id);
-  ensureDocumentExists(user, 'User', res);
+  IsExists(user, 'User', res);
 
   // Joi validation -> validate input
   const { error } = editUserSchema.validate(req.body);
@@ -135,7 +135,7 @@ export const changeBusinessStatus = asyncHandler(async (req, res) => {
 
   // find user
   const user = await User.findById(id);
-  ensureDocumentExists(user, 'User', res);
+  IsExists(user, 'User', res);
   // if (!user) {
   //   res.status(404);
   //   throw new Error('User not found');
@@ -166,7 +166,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
   }
 
   const deletedUser = await User.findByIdAndDelete(id);
-  ensureDocumentExists(deletedUser, 'User', res);
+  IsExists(deletedUser, 'User', res);
 
   res.status(200).json(deletedUser);
 });

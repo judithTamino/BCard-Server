@@ -1,7 +1,6 @@
 const errorHandler = (err, req, res, next) => {
   try {
-    const statuseCode = res.status ? res.status : 500;
-
+    const statuseCode = res.statusCode ? res.statusCode : 500;
     switch (statuseCode) {
       case 400:
         res.json({ title: 'Bad Request', msg: err.message, stack: err.stack });
