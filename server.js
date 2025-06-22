@@ -4,6 +4,7 @@ import connectToDB from './database/mongodb.js';
 import userRouter from './routes/user.routes.js';
 import corsMiddleware from './middlewares/cors.middleware.js';
 import errorHandler from './middlewares/error.middleware.js';
+import cardRouter from './routes/card.routes.js';
 
 // app config
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.static('/public'));
 
 // api endpoints
 app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 // error middleware
 app.use(errorHandler);

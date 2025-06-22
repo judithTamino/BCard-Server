@@ -16,5 +16,6 @@ export const EMAIL = {
   trim: true,
   lowercase: true,
   match: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+  unique: true,
   required: [true, 'Email address is required'],
 };
