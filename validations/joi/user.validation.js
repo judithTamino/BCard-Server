@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const editUserSchema = Joi.object({
+export const userSchema = Joi.object({
   name: Joi.object()
     .keys({
       first: Joi.string().required(),
@@ -20,7 +20,7 @@ const editUserSchema = Joi.object({
     .keys({
       url: Joi.string()
         .ruleset.regex(/^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|svg))$/i)
-        .rule({ message: 'Image URL must be a standard URL' }),
+        .rule({ message: 'Image URL must be a standard URL' }).allow(""),
       alt: Joi.string().allow("")
     }),
   address: Joi.object()
@@ -35,4 +35,12 @@ const editUserSchema = Joi.object({
   isBusiness: Joi.boolean().required()
 });
 
-export default editUserSchema;
+export const loginSchema = Joi.object({
+  email: Joi.string()
+    .ruleset.regex(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/)
+    .rule({ message: 'Email must be a standard email' }).required(),
+  password: Joi.string()
+    .ruleset.regex(/((?=.*\d{1})(?=.*[A-Z]{1})(?=.*[a-z]{1})(?=.*[!@#$%^&*-]{1}).{7,20})/)
+    .rule({ message: 'Password must be at least 7 characters long and contain an uppercase letter, a lowercase letter, a number and one of the following characters !@#$%^&*-' }).required(),
+});
+

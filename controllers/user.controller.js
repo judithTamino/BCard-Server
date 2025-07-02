@@ -1,25 +1,19 @@
 import asyncHandler from 'express-async-handler';
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
-import isValidAddress from "../utils/isValidAddress.js";
 import { generateAuthToken } from '../auth/jwt.js';
-import editUserSchema from '../validations/joi/editUser.js';
 import IsExists from '../utils/IsExists.utils.js';
-
-const isValidName = (name) => {
-  const { first, last } = name;
-  return first && last;
-}
+import { loginValidation, userValidation } from '../validations/validation.service.js';
 
 // @des Register User
 // @route POST/users
 // @access public
 export const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, phone, password, address, isBusiness } = req.body;
-
-  if (!isValidName(name) || !email || !phone || !password || !isValidAddress(address) || typeof isBusiness !== 'boolean') {
+  // Check if input fields are valid
+  const errorMsg = userValidation(req.body);
+  if (errorMsg) {
     res.status(400);
-    throw new Error('Missing Details');
+    throw new Error(errorMsg);
   }
 
   const user = new User(req.body);
@@ -33,6 +27,13 @@ export const registerUser = asyncHandler(async (req, res) => {
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  // Check if input fields are valid
+  const errorMsg = loginValidation(req.body);
+  if (errorMsg) {
+    res.status(400);
+    throw new Error(errorMsg);
+  }
+
   // check if user exists
   const user = await User.findOne({ email });
   IsExists(user, 'User', res);
@@ -41,7 +42,7 @@ export const loginUser = asyncHandler(async (req, res) => {
   const isPasswordValid = await bcrypt.compareSync(password, user.password);
   if (!isPasswordValid) {
     res.status(401);
-    throw new Error('Invalid Password or Email');
+    throw new Error('Invalid password.');
   }
 
   // genarete token
@@ -98,11 +99,11 @@ export const editUser = asyncHandler(async (req, res) => {
   const user = await User.findById(id);
   IsExists(user, 'User', res);
 
-  // Joi validation -> validate input
-  const { error } = editUserSchema.validate(req.body);
-  if (error) {
+  // Check if input fields are valid
+  const errorMsg = userValidation(req.body);
+  if (errorMsg) {
     res.status(400);
-    error.details.map(err => { throw new Error(err.message) });
+    throw new Error(errorMsg);
   }
 
   // hash password if it`s being updated
@@ -125,7 +126,6 @@ export const editUser = asyncHandler(async (req, res) => {
 export const changeBusinessStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const userData = req.user;
-  const { isBusiness } = req.body;
 
   // check authorization 
   if (userData._id !== id) {
@@ -136,18 +136,8 @@ export const changeBusinessStatus = asyncHandler(async (req, res) => {
   // find user
   const user = await User.findById(id);
   IsExists(user, 'User', res);
-  // if (!user) {
-  //   res.status(404);
-  //   throw new Error('User not found');
-  // }
 
-  // chack typeof isBusiness
-  if (typeof isBusiness !== 'boolean') {
-    res.status(400);
-    throw new Error('Business status must be true or false.');
-  }
-
-  user.isBusiness = isBusiness;
+  user.isBusiness = !user.isBusiness;
   user.save();
   res.status(200).json(user);
 });
